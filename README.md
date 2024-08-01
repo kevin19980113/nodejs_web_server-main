@@ -1,15 +1,24 @@
-# "Node.js Tutorial - How to Build a Web Server"
+# Node.js Web Server - MongoDB with Mongoose: Async CRUD
 
-✅ [Check out my YouTube Channel with all of my tutorials](https://www.youtube.com/DaveGrayTeachesCode).
+## Project Overview
 
-**Description:**
+This project is a comprehensive Node.js tutorial that demonstrates how to build a robust web server.
+It's designed to learn basic node.js / express.js / mongoDB with Mongoose
 
-This repository shares the code applied during the Youtube tutorial. The tutorial is part of a [Node.js for Beginners Playlist](https://www.youtube.com/playlist?list=PL0Zuz27SZ-6PFkIxaJ6Xx_X46avTM1aYw) on my channel.  
+## Features
 
-[YouTube Tutorial](https://youtu.be/3ZAKY-CDKog) for this repository.
+- Express.js web application framework
+- MongoDB integration with Mongoose
+- User authentication and authorization
+- JSON Web Token (JWT) implementation
+- Error logging and request logging
+- CORS configuration
+- Static file serving
+- MVC-like structure (routes, controllers, models)
 
-I suggest completing my [8 hour JavaScript course tutorial video](https://youtu.be/EfAl9bwzVZk) if you are new to Javascript.
+## Skills
 
-### Academic Honesty
-
-**DO NOT COPY FOR AN ASSIGNMENT** - Avoid plagiargism and adhere to the spirit of this [Academic Honesty Policy](https://www.freecodecamp.org/news/academic-honesty-policy/).
+- JavaScript
+- Node.js
+- Express.js
+- MongoDB with Mongoose
