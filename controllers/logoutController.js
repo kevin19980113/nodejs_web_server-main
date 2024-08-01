@@ -8,6 +8,9 @@ const usersDB = {
 const fsPromises = require("fs").promises;
 const path = require("path");
 
+// LOGOUT:
+// delete refresh token from users DB(Server) and cookie
+// delete access token from memory(fornt-side)
 const handleLogout = async (req, res) => {
   // On client-side(front-end), also delete the accessToken
   const cookies = req.cookies;
@@ -16,14 +19,13 @@ const handleLogout = async (req, res) => {
 
   const foundUser = usersDB.users.find(
     (person) => person.refreshToken === refreshToken
-  ); // find user by refreshToken
+  );
   if (!foundUser) {
     res.clearCookie("jwt", { httpOnly: true, sameSite: "Strict" });
     // secure: true - only serves on https (dev server - http) (production server - https)
     return res.sendStatus(204);
   }
-
-  // Delete refresh token from users DB
+  // Delete refresh token from users DB(Server)
   const otherUsers = usersDB.users.filter(
     (person) => person.username !== foundUser.username
   );
@@ -34,7 +36,7 @@ const handleLogout = async (req, res) => {
     JSON.stringify(usersDB.users)
   );
 
-  res.clearCookie("jwt", { httpOnly: true, sameSite: "Strict" });
+  res.clearCookie("jwt", { httpOnly: true, sameSite: "Strict" }); // delete cookie
   res.sendStatus(204);
 };
 

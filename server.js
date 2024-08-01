@@ -1,16 +1,23 @@
+require("dotenv").config();
+
 const express = require("express");
 const app = express();
 const path = require("path");
-const cors = require("cors"); // to allow cross-origin requests
+const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
 const { logger } = require("./middleware/logEvents");
 const errorHandler = require("./middleware/errorHandler");
 const verifyJWT = require("./middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middleware/credentials");
+const mongoose = require("mongoose");
+const connectDB = require("./config/dbConn");
 const PORT = process.env.PORT || 3500;
 
 // node.js works like waterfall
+
+// Connect to MongoDB
+connectDB();
 
 // custom middleware logger
 app.use(logger);
@@ -65,4 +72,7 @@ app.all("*", (req, res) => {
 // custom error handling middleware
 app.use(errorHandler);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+mongoose.connection.once("open", () => {
+  console.log("MongoDB connected");
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}); // only when we sucessfully connect to MongoDB, listen to the server

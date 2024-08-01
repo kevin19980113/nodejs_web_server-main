@@ -6,8 +6,6 @@ const usersDB = {
 };
 
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
-
 const handleRefreshToken = (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(401);
@@ -19,17 +17,23 @@ const handleRefreshToken = (req, res) => {
   if (!foundUser) {
     return res.sendStatus(403); // Forbidden
   }
-  // evaluate jwt
+
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
     if (err || foundUser.username !== decoded.username)
       return res.sendStatus(403);
     // if refreshToken is valid, create and send new access token
+    const roles = Object.values(foundUser.roles);
     const accessToken = jwt.sign(
-      { username: foundUser.username },
+      {
+        UserInfo: {
+          username: foundUser.username,
+          roles,
+        },
+      },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "15m" }
     );
-    res.json({ accessToken }); // send access token json to front-end developer
+    res.json({ accessToken });
   });
 };
 
