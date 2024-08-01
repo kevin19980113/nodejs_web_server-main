@@ -1,18 +1,10 @@
-const usersDB = {
-  users: require("../model/users.json"),
-  setUsers: function (data) {
-    this.users = data;
-  },
-};
+const UserDB = require("../model/User");
 const bcrypt = require("bcrypt");
-
 // ->> jwt.sign() generates a signed token (header + payload + signature)
 // signature: created by encoded header, encoded payload, and a secret
 // Signed tokens can verify the integrity of the claims contained within it
 // the signature also certifies that only the party holding the private key(secret) is the one that signed it.
 const jwt = require("jsonwebtoken");
-const fsPromises = require("fs").promises;
-const path = require("path");
 
 const handleLogin = async (req, res) => {
   const { user, pwd } = req.body;
@@ -20,11 +12,11 @@ const handleLogin = async (req, res) => {
     return res
       .status(400) // status 400 means bad request
       .json({ error: "Username and password are required" });
-  const foundUser = usersDB.users.find((person) => person.username === user);
+
+  const foundUser = await UserDB.findOne({ username: user }).exec();
   if (!foundUser) {
     return res.sendStatus(401); // status 401 means authentication
   }
-
   const match = await bcrypt.compare(pwd, foundUser.password);
   // if passwords match(authenticated), create(sign) and send JWTs(Json Web Tokens)
 
@@ -53,16 +45,11 @@ const handleLogin = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    const otherUsers = usersDB.users.filter(
-      (person) => person.username !== foundUser.username
-    );
     // update usersDB with updated currently logged in User with refreshToken (send refresh token to server(DB))
-    const currentUser = { ...foundUser, refreshToken };
-    usersDB.setUsers([...otherUsers, currentUser]);
-    await fsPromises.writeFile(
-      path.join(__dirname, "..", "model", "users.json"),
-      JSON.stringify(usersDB.users)
-    );
+    foundUser.refreshToken = refreshToken;
+    const result = await foundUser.save();
+    console.log(`Logged in: ${result.username} successfully!`);
+
     // store refreshToken in cookie
     res.cookie("jwt", refreshToken, {
       httpOnly: true, // httpOnly cookie is not allowable to be accessed by scripts injection (protect against XSS attacks)
@@ -71,7 +58,6 @@ const handleLogin = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
 
-    console.log(`Logged in: ${foundUser.username} successfully!`);
     res.json({ accessToken }); // send response with access token to the front-side
   } else {
     res.sendStatus(401); // Unauthenticated

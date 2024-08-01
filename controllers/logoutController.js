@@ -1,12 +1,4 @@
-const usersDB = {
-  users: require("../model/users.json"),
-  setUsers: function (data) {
-    this.users = data;
-  },
-};
-
-const fsPromises = require("fs").promises;
-const path = require("path");
+const UserDB = require("../model/User");
 
 // LOGOUT:
 // delete refresh token from users DB(Server) and cookie
@@ -17,24 +9,16 @@ const handleLogout = async (req, res) => {
   if (!cookies?.jwt) return res.sendStatus(204); // No Content (that's fine)
   const refreshToken = cookies.jwt;
 
-  const foundUser = usersDB.users.find(
-    (person) => person.refreshToken === refreshToken
-  );
+  const foundUser = await UserDB.findOne({ refreshToken }).exec();
   if (!foundUser) {
     res.clearCookie("jwt", { httpOnly: true, sameSite: "Strict" });
     // secure: true - only serves on https (dev server - http) (production server - https)
     return res.sendStatus(204);
   }
   // Delete refresh token from users DB(Server)
-  const otherUsers = usersDB.users.filter(
-    (person) => person.username !== foundUser.username
-  );
-  const currentUser = { ...foundUser, refreshToken: null };
-  usersDB.setUsers([...otherUsers, currentUser]);
-  await fsPromises.writeFile(
-    path.join(__dirname, "..", "model", "users.json"),
-    JSON.stringify(usersDB.users)
-  );
+  foundUser.refreshToken = null;
+  const result = await foundUser.save();
+  console.log(`Logged out: ${result.username} successfully!`);
 
   res.clearCookie("jwt", { httpOnly: true, sameSite: "Strict" }); // delete cookie
   res.sendStatus(204);
